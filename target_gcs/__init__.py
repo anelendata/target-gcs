@@ -19,11 +19,6 @@ logging.getLogger('googleapiclient.discovery_cache').setLevel(logging.ERROR)
 logger = logging.getLogger()
 
 
-# SCOPES = ['https://www.googleapis.com/auth/bigquery','https://www.googleapis.com/auth/bigquery.insertdata']
-# CLIENT_SECRET_FILE = 'client_secret.json'
-# APPLICATION_NAME = 'Google Cloud Storage Stream Upload'
-
-
 class GCSObjectStreamUpload(object):
     """
     adopted from: https://dev.to/sethmlarson/python-data-streaming-to-google-cloud-storage-with-resumable-uploads-458h

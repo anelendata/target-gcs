@@ -48,6 +48,26 @@ In this case, the account needs Storage Admin. Otherwise, Object Createor at min
 echo -e '{"line": 1, "value": "hello"}\n{"line": 2, "value": "world"}' | target_gcs -c ./your-config.json
 ```
 
+Here is the example to get USGS earthquake events data:
+
+```
+curl "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2020-06-24&endtime=2020-06-25" | target_gcs -c ./your-config.json
+```
+
+## Extra: Creating a schemaless, externally partitioned BigQuery table from GCS files
+
+```
+git clone git@github.com:anelendata/target_gcs.git
+cd target_gcs
+pip install google-cloud-bigquery
+```
+
+```
+python create_schemaless_table.py -p your-project-id -g gs://your-bucket/your-dataset -d your-dataset-name -t your-table-name
+```
+
+Note: dataset must exist.
+
 ---
 
 Copyright &copy; 2020 Anelen Co, LLC
