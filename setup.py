@@ -10,6 +10,7 @@ setup(
     classifiers=["Programming Language :: Python :: 3 :: Only"],
     py_modules=["target_gcs"],
     install_requires=[
+        "setuptools>=40.3.0",
         "singer-python>=5.0.12",
         "google-cloud>=0.34.0",
         "google-cloud-storage>=1.29.0",

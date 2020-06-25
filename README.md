@@ -9,6 +9,15 @@ Read in stdin and write out to Google Cloud Storage.
 ```
 python3 -m venv ./venv
 source ./venv/bin/activate
+```
+
+Then
+
+```
+pip install https://github.com/anelendata/target_gcs/tarball/master
+```
+Or
+```
 git clone git@github.com:anelendata/target_gcs.git
 pip install -e target_gcs
 ```
@@ -36,7 +45,7 @@ If the bucket specified in the config does not exist, target_gcs tries to create
 In this case, the account needs Storage Admin. Otherwise, Object Createor at minimum.
 
 ```
-echo -e '{"line": 1, "value": "hello"}\n{"line": 2, "value": "world"}' | target_gcs -c ./config.json
+echo -e '{"line": 1, "value": "hello"}\n{"line": 2, "value": "world"}' | target_gcs -c ./your-config.json
 ```
 
 ---
