@@ -1,0 +1,5 @@
+{
+  "project_id": "your-project-id",
+  "bucket": "your-bucket-name",
+  "blob": "your-dataset/version=1.0.0/format=json/date={etl_datetime:.10}/{etl_datetime:.10}-{etl_tstamp}"
+}
