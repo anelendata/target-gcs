@@ -17,7 +17,7 @@ logging.getLogger('googleapiclient.discovery_cache').setLevel(logging.ERROR)
 logger = logging.getLogger()
 
 
-def create_bq_table(project, gcs_uri, dataset, table):
+def create_bq_table(project, gcs_uri, dataset, table, require_hive_partition_filter=True):
     bq_client = bigquery.Client(project=project)
     table_ref = bq_client.dataset(dataset).table(table)
     table = bigquery.Table(table_ref)
@@ -25,6 +25,15 @@ def create_bq_table(project, gcs_uri, dataset, table):
     hive_partition_options = HivePartitioningOptions()
     hive_partition_options.mode = "AUTO"
     hive_partition_options.source_uri_prefix = gcs_uri
+
+    # To prevent one from accidentaly scan the whole table, set this
+    # partition filter requirement.
+    #
+    # table.require_partition_filter = True is not supported by the class yet.
+    # hive_partition_options.require_partition_filter = True is not
+    # supported by the class yet.
+    # So I need to do the following to include the option:
+    hive_partition_options._properties["require_partition_filter"] = require_hive_partition_filter
 
     extconfig = bigquery.ExternalConfig('CSV')
     extconfig.schema = [bigquery.SchemaField('line', 'STRING')]
