@@ -135,7 +135,7 @@ def process_singer_format(lines, stream, on_invalid_record="force", encoding="ut
             if on_invalid_record != "force":
                 validate(msg.record, schema)
 
-            record_str = json.dumps(msg.record)
+            record_str = json.dumps(msg.record) + "\n"
             stream.write(record_str.encode(encoding))
             rows[msg.stream] += 1
 
