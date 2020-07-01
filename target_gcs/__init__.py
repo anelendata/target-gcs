@@ -97,6 +97,82 @@ class GCSObjectStreamUpload(object):
         return self._read
 
 
+def emit_state(state):
+    if state is not None:
+        line = json.dumps(state)
+        logger.debug('Emitting state {}'.format(line))
+        sys.stdout.write("{}\n".format(line))
+        sys.stdout.flush()
+
+
+def process_singer_format(lines, stream, on_invalid_record="force", encoding="utf-8"):
+    if on_invalid_record != "force":
+        from jsonschema import validate
+        from jsonschema.exceptions import ValidationError
+    import singer
+
+    state = None
+
+    schemas = {}
+    key_properties = {}
+    tables = {}
+    rows = {}
+    errors = {}
+
+    for line in lines:
+        try:
+            msg = singer.parse_message(line)
+        except json.decoder.JSONDecodeError:
+            logger.error("Unable to parse:\n{}".format(line))
+            raise
+
+        if isinstance(msg, singer.RecordMessage):
+            if msg.stream not in schemas:
+                raise Exception("A record for stream {} was encountered before a corresponding schema".format(msg.stream))
+
+            schema = schemas[msg.stream]
+
+            if on_invalid_record != "force":
+                validate(msg.record, schema)
+
+            record_str = json.dumps(msg.record)
+            stream.write(record_str.encode(encoding))
+            rows[msg.stream] += 1
+
+            state = None
+
+        elif isinstance(msg, singer.StateMessage):
+            logger.debug('Setting state to {}'.format(msg.value))
+            state = msg.value
+
+        elif isinstance(msg, singer.SchemaMessage):
+            table = msg.stream
+            schemas[table] = msg.schema
+            key_properties[table] = msg.key_properties
+            rows[table] = 0
+            errors[table] = None
+
+        elif isinstance(msg, singer.ActivateVersionMessage):
+            # This is experimental and won't be used yet
+            pass
+
+        else:
+            raise Exception("Unrecognized message {}".format(msg))
+
+    for table in errors.keys():
+        if not errors[table]:
+            logger.info('Loaded {} row(s)'.format(rows[table]))
+        else:
+            logger.info('Errors:', errors[table], sep=" ")
+
+    return state
+
+
+def process_general(lines, stream):
+    for line in lines:
+        stream.write(line.encode(encoding))
+
+
 def main():
     with open(flags.config) as input:
         config = json.load(input)
@@ -121,9 +197,17 @@ def main():
         print(e)
         bucket = client.create_bucket(bucket_name)
     input = io.TextIOWrapper(sys.stdin.buffer, encoding=encoding)
+
+
+    state = None
     with GCSObjectStreamUpload(client=client, bucket_name=bucket_name, blob_name=blob_name) as s:
-        for row in input:
-            s.write(row.encode(encoding))
+        if config.get("singer_format", False):
+            state = process_singer_format(input, s, encoding=encoding)
+        else:
+            process_general(input, s, encoding=encoding)
+
+    if state:
+        emit_state(state)
 
 
 if __name__ == "__main__":
