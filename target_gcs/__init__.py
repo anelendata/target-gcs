@@ -1,4 +1,4 @@
-import argparse, datetime, io, json, logging, sys
+import argparse, datetime, io, json, logging, sys, simplejson
 
 from oauth2client import tools
 
@@ -122,7 +122,7 @@ def process_singer_format(lines, stream, on_invalid_record="force", encoding="ut
     for line in lines:
         try:
             msg = singer.parse_message(line)
-        except json.decoder.JSONDecodeError:
+        except (json.decoder.JSONDecodeError, simplejson.scanner.JSONDecodeError) as e:
             logger.error("Unable to parse:\n{}".format(line))
             raise
 
