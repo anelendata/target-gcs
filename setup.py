@@ -14,7 +14,7 @@ setup(
         "singer-python>=5.0.12",
         "google-cloud>=0.34.0",
         "google-cloud-storage>=1.29.0",
-        "google-resumable-media>=0.5.1",
+        "google-resumable-media<0.6",
         "oauth2client>=4.1.3",
         "google-api-python-client>=1.9.3"
     ],
